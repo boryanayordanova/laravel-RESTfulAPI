@@ -11,4 +11,7 @@ class ApiController extends Controller
     //The trait with the diff responses also can be acces on the other Controlles by usage it here:
     use ApiResponser; //inport class
     
+    public function __construct(){
+      
+    }
 }
