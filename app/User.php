@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Support\Str;
+use App\Transformers\UserTransformer;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -22,6 +23,7 @@ class User extends Authenticatable
     protected $table = 'users';
     protected $dates = ['deleted_at'];
 
+    public $transformer = UserTransformer::class;
     //mutator
     public function setNameAttribute($name){
         $this->attributes['name'] = strtolower($name);
