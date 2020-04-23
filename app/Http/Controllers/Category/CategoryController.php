@@ -14,6 +14,7 @@ class CategoryController extends ApiController
         parent::__construct();
         $this->middleware('transform.input:' . CategoryTransformer::class)->only(['store','update']);
     }
+    
     /**
      * Display a listing of the resource.
      *

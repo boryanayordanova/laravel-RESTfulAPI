@@ -6,6 +6,7 @@ use App\User;
 use App\Mail\UserCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Transformers\UserTransformer;
 use App\Http\Controllers\ApiController;
 
 class UserController extends ApiController
