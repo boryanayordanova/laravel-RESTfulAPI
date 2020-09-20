@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Support\Str;
+use Laravel\Passport\HasApiTokens;
 use App\Transformers\UserTransformer;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, HasApiTokens, SoftDeletes;
 
     const VERIFIED_USER = '1';
     const UNVERIFIED_USER = '0';
@@ -73,7 +74,6 @@ class User extends Authenticatable
     // public function verify($token)
     // {
     //     $user = User::where('verification_token', $token)->firstOrFail();
-
     //     $user->verified = User::VERIFIED_USER;
     //     $user->verification_token = null;
 

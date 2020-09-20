@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 
 class CategoryTransactionController extends ApiController
 {
+    public function __construct(){
+        parent::__construct();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +18,8 @@ class CategoryTransactionController extends ApiController
      */
     public function index(Category $category)
     {
+        $this->allowedAdminAction();
+        
         $transactions = $category->products()
             //all the products has relationship "ransactions()", but we dont know if all the products has a transaction, some of them may not have
 

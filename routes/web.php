@@ -29,9 +29,11 @@ Route::get('/', function () {
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+
 // Registration Routes...
-Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-Route::post('register', 'Auth\RegisterController@register');
+// Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+// Route::post('register', 'Auth\RegisterController@register');
+
 // // Password Reset Routes... 
 // Route::resetPassword();
 // // Password Confirmation Routes...   
@@ -47,3 +49,7 @@ Route::get('/', function(){
     return view('welcome');
 })->middleware('guest'); 
 // guest- only allowed and not validated to be there, otherway they gonna be redirected to the home route
+
+Route::get('/home/my-tokens', 'HomeController@getTokens')->name('personal-tokens');
+Route::get('/home/my-clients', 'HomeController@getClients')->name('personal-clients');
+Route::get('/home/authorized-clients', 'HomeController@getAuthorizedClients')->name('authorized-clients');

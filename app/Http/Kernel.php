@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -15,10 +16,13 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
-        \App\Http\Middleware\CheckForMaintenanceMode::class,
+        //\App\Http\Middleware\CheckForMaintenanceMode::class,
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
-        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,  
+        \Fruitcake\Cors\HandleCors::class, 
+        
     ];
 
     /**
@@ -38,10 +42,11 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
-        'api' => [
+        'api' => [            
+            'cors',
             'signature:X-Application-Name',
             'throttle:5,1',
-            'bindings',
+            'bindings'
         ],
     ];
 
@@ -58,13 +63,27 @@ class Kernel extends HttpKernel
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        // 'cors' => \Fruitcake\Cors\HandleCors::class,
+        'cors' => \App\Http\Middleware\Cors::class,
+        'client.credentials' => \Laravel\Passport\Http\Middleware\CheckClientCredentials::class,        
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+
+        //the access token have at least 1 access token
+        'scope' => \Laravel\Passport\Http\Middleware\CheckForAnyScope::class, 
+
+        //if an access token has all the scoopes we need
+        'scopes' => \Laravel\Passport\Http\Middleware\CheckForAnyScope::class,
+
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'signature' => \App\Http\Middleware\SignatureMiddleware::class,
         'transform.input' => \App\Http\Middleware\TransformInput::class,
+
+        'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,   
+            
+
     ];
 
     /**

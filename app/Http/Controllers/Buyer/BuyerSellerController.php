@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 
 class BuyerSellerController extends ApiController
 {
+    public function __construct(){
+        parent::__construct();
+        //we dont implement here the middlewhare for scope:read-general because this should be accesseble only the the admins. We shouldnt give any other permissions.
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +19,9 @@ class BuyerSellerController extends ApiController
      */
     public function index(Buyer $buyer)
     {
+
+        $this->allowedAdminAction();
+        
         $sellers = $buyer->transactions()->with('product.seller')
             ->get()
             ->pluck('product.seller')   //seller is in product on json reslt

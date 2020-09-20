@@ -13,8 +13,15 @@ class UserController extends ApiController
 {
 
     public function __construct(){
-        parent::__construct();
+        $this->middleware('client.credentials')->only(['store', 'resend']); //protect the cilent
+        $this->middleware('auth:api')->except(['store', 'verify', 'resend']); //protect the client and the user (me is here as well)
         $this->middleware('transform.input' . UserTransformer::class)->only(['store', 'update']);
+        $this->middleware('scope:manage-account')->only(['show', 'update']);
+        
+        $this->middleware('can:view,user')->only(['show']);
+        $this->middleware('can:update,user')->only(['update']);
+        $this->middleware('can:delete,user')->only(['destroy']);
+
     }
     /**
      * Display a listing of the resource.
@@ -23,6 +30,8 @@ class UserController extends ApiController
      */
     public function index()
     {
+        $this->allowedAdminAction();
+
         $users = User::all();
         //return response()->json(['data' => $users], 200); //200 is OK response code
         //same as above, but with trait ApiResponser, used on ApiController
@@ -84,7 +93,7 @@ class UserController extends ApiController
      */
     public function update(Request $request, User $user/*$id*/)
     {
-        //$user = User::findOrFail($id); //used when the param is $id
+        //$user = User::findOrFail($id); //used when the param is $id             
 
         $rules = [
             'email' => 'email|unique:users,email,' . $user->id, //if user want to updare his profile his email gonna be the same, so we need to get new unique email, except the existing one of the current user
@@ -110,6 +119,8 @@ class UserController extends ApiController
         }
 
         if($request->has('is_admin')){
+            $this->allowedAdminAction();   
+            
             if(!$user->isVerified()){ //if the user is not verified -> error
                 //return response()->json(['error' => "Only verified users can modify the admin field", 'code' => 409], 409 );
                 //same as above, but with trait ApiResponser, used on ApiController
@@ -147,6 +158,13 @@ class UserController extends ApiController
         //same as above, but with trait ApiResponser, used on ApiController
         return $this->showOne($user);
 
+    }
+
+    public function me(Request $request){ //we need the request in order to identify the user 
+        
+        $user = $request->user();
+
+        return $this->showOne($user);
     }
 
     public function verify($token){

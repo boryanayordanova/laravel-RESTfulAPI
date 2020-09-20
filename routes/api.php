@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,6 +21,7 @@ use Illuminate\Http\Request;
 // });
 
 /* Users */
+Route::name('me')->get('users/me', 'User\UserController@me');
 Route::resource('users', 'User\UserController', ['except' => ['create', 'edit']]);
 Route::name('verify')->get('users/verify/{token}', 'User\UserController@verify');
 Route::name('resend')->get('users/{user}/resend', 'User\UserController@resend');
@@ -49,6 +52,9 @@ Route::resource('products.transactions', 'Product\ProductTransactionController',
 Route::resource('products.buyers', 'Product\ProductBuyerController', ['only' => ['index']]);
 Route::resource('products.buyers.transactions', 'Product\ProductBuyerTransactionController', ['only' => ['store']]);
 Route::resource('products.categories', 'Product\ProductCategoryController', ['only' => ['index', 'update', 'destroy']]);
+Route::resource('products.transactions', 'Product\ProductTransactionController', ['only' => ['index']]);
+
+
 
 
 /* Category */
@@ -57,3 +63,9 @@ Route::resource('categories.products', 'Category\CategoryProductController', ['o
 Route::resource('categories.sellers', 'Category\CategorySellerController', ['only' => ['index']]);
 Route::resource('categories.transactions', 'Category\CategoryTransactionController', ['only' => ['index']]);
 Route::resource('categories.buyers', 'Category\CategoryBuyerController', ['only' => ['index']]);
+
+
+/* Tokens */
+
+Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
+

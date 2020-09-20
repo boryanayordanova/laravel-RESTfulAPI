@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use App\Traits\ApiResponser;
+use Asm89\Stack\CorsService;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +25,7 @@ class Handler extends ExceptionHandler
      */
     protected $dontReport = [
         //
+        
     ];
 
     /**
@@ -47,6 +49,8 @@ class Handler extends ExceptionHandler
         parent::report($exception);
     }
 
+
+
     /*original render */
     /**
      * Render an exception into an HTTP response.
@@ -57,21 +61,32 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        if($exception instanceof ValidationException){
+        $response = $this->handleException($request, $exception);
+
+        app(CorsService::class)->addActualRequestHeaders($response, $request);
+
+        return $response;
+        
+    }
+
+    public function handleException($request, Exception $exception){
+        if($exception instanceof ValidationException){            
             return $this->convertValidationExceptionToResponse($exception, $request);
         }
 
         //check if model is not found
         if($exception instanceof ModelNotFoundException){
-            $modelName = strtolower(class_basename($exception->getModel()));
+            $modelName = strtolower(class_basename($exception->getModel()));            
             //return $this->errorResponse("Does not exist any model with the specified identificator", 404);
             return $this->errorResponse("Does not exist any {$modelName} with the specified identificator", 404);
         }
         if($exception instanceof AuthenticationException){
+            //dd($exception);
             return $this->unauthenticated($request, $exception);
         }
-        if($exception instanceof AuthorizationException){
-            return $this->errorResponse($exception->getMessage(), 403);//
+        
+        if($exception instanceof AuthorizationException){            
+            return $this->errorResponse($exception->getMessage(), 403);
         }
         if($exception instanceof NotFoundHttpException){
             return $this->errorResponse("The specified URL cannot be found", 403);
@@ -89,6 +104,10 @@ class Handler extends ExceptionHandler
                 return $this->errorResponse('Cannot remove this resource parametly. It is related with any other resource', 409);
             }
         }
+        if($exception instanceof TokenMismatchException){
+            return redirect()->back()->withInput($request->input());
+        }
+
         //if the app is on debug mode
         if(config('app.debug')){
             //return the detail response
@@ -96,8 +115,24 @@ class Handler extends ExceptionHandler
         }
         //otherway (on production mode) - return general exception message 
         return $this->errorResponse("Unexpected Exception. Try later", 500);
-        
     }
+
+        /**
+     * Convert an authentication exception into an unauthenticated response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Auth\AuthenticationException  $exception
+     * @return \Illuminate\Http\Response
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($this->isFrontend($request)) {
+            return redirect()->guest('login');
+        }
+
+        return $this->errorResponse('Unauthenticated.', 401);
+    }
+
 
      /**
      * Create a response object from the given validation exception.
@@ -121,12 +156,25 @@ class Handler extends ExceptionHandler
 
         $errors = $e->validator->errors()->getMessages();      
 
+        if ($this->isFrontend($request)) {
+            return $request->ajax() ? response()->json($error, 422) : redirect()
+                ->back()
+                ->withInput($request->input())
+                ->withErrors($errors);
+        }
+
         //return response()->json($errors, 422);
         //when we declare "use ApiResponser" above we can change it to:
         return $this->errorResponse($errors, 422);
         
     }
 
+
+    private function isFrontend($request){
+
+        return $request->acceptsHtml() && collect($request->route()->middleware())->contains('web');
+
+    }
 
 
 }
